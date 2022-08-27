@@ -7,7 +7,6 @@ class FileSigner
 {
     using FileName = std::string;
 public:
-    FileSigner();
     [[nodiscard]] bool GenerateSign(const FileName& input, const FileName& output, size_t block_size);
     [[nodiscard]] const std::string& GetErrorString() const
     {
