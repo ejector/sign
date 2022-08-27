@@ -3,7 +3,7 @@
 
 #include <string>
 
-class CommandLineParser
+class CommandLineParser final
 {
 private:
     struct Args
