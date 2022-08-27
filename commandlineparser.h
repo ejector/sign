@@ -3,7 +3,6 @@
 
 #include <string>
 
-
 class CommandLineParser
 {
 private:
@@ -14,7 +13,7 @@ private:
         size_t block_size = 1024 * 1024;
     };
 public:
-    [[nodiscard]] Args GetArgs(int argc, char** argv) const;
+    [[nodiscard]] static Args Parse(int argc, char** argv);
 };
 
 #endif // COMMANDLINEPARSER_H
