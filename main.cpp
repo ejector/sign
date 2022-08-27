@@ -1,9 +1,17 @@
+#include "commandlineapp.h"
+
+#include <exception>
 #include <iostream>
 
-using namespace std;
-
-int main()
+int main(int argc, char** argv)
 {
-    cout << "Hello World!" << endl;
-    return 0;
+    try {
+        CommandLineApp app(argc, argv);
+        return app.Exec();
+    } catch (std::exception& e) {
+        std::cout << "An errror occured: " << e.what() << std::endl;
+    } catch (...) {
+        std::cout << "An errror occured. Exit." << std::endl;
+    }
+    return CommandLineApp::kExitWithError;
 }
