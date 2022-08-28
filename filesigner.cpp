@@ -13,7 +13,7 @@ unsigned int HashRot13(Iter iter, size_t size)
     auto end = Iter{};
     while (size-- != 0 && iter++ != end)
     {
-        std::cout << "iter pos: " << size << ", value: " << *iter << std::endl;
+//        std::cout << "iter pos: " << size << ", value: " << *iter << std::endl;
         hash += *iter;
         hash -= (hash << 13) | (hash >> 19);
     }
@@ -23,28 +23,42 @@ unsigned int HashRot13(Iter iter, size_t size)
 
 bool FileSigner::GenerateSign(const FileName& input, const FileName& output, size_t block_size)
 {
-    auto file_size = std::filesystem::file_size(input);
-    auto block_count = file_size / block_size;
+    try {
+        auto file_size = std::filesystem::file_size(input);
+        auto block_count = file_size / block_size;
 
-    std::cout << "Block counts: " << block_count << std::endl;
+        std::cout << "Block counts: " << block_count << std::endl;
 
-    std::vector<unsigned int> signature(block_count, 0);
+        std::vector<unsigned int> signature(block_count, 0);
 
-    auto GenerateHash = [=](size_t block_index) {
-        std::ifstream stream(input);
-        if (!stream) {
-            throw std::logic_error("Cannot open file: " + input);
+        auto GenerateHash = [=](size_t block_index) {
+            std::ifstream stream(input, std::ios::binary);
+            if (!stream) {
+                throw std::logic_error("Cannot open file: " + input);
+            }
+
+            auto position = block_index * block_size;
+            stream.seekg(position);
+
+            std::istreambuf_iterator<char> iterator(stream);
+            return HashRot13(iterator, block_size - 1);
+        };
+
+        for (decltype(block_count) i = 0; i < block_count; ++i) {
+            std::cout << "Count: " << i << std::endl;
+            signature.at(i) = GenerateHash(i);
         }
 
-        auto position = block_index * block_size;
-        stream.seekg(position);
+        std::ofstream ostream(output, std::ios::binary);
 
-        std::istreambuf_iterator<char> iterator(stream);
-        return HashRot13(iterator, block_size - 1);
-    };
+        for (const auto& item: signature) {
+            ostream << item;
+        }
 
-    for (decltype(block_count) i = 0; i < block_count; ++i) {
-        signature.at(i) = GenerateHash(i);
+        return true;
+
+    } catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
     }
 
     return false;

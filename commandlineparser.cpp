@@ -19,7 +19,7 @@ CommandLineParser::Args CommandLineParser::Parse(int argc, char** argv)
         args.input_file = argv[1];
         args.output_file = argv[2];
     } else if (argc == 4) {
-        args.block_size = std::stoul(argv[3]);
+        args.block_size = std::stoul(argv[3]) * 1024 * 1024;
     }
 
     return args;
