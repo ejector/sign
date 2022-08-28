@@ -45,7 +45,7 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
         };
 
         for (decltype(block_count) i = 0; i < block_count; ++i) {
-            std::cout << "Count: " << i << std::endl;
+            std::cout << "Block Count: " << i << std::endl;
             signature.at(i) = GenerateHash(i);
         }
 
@@ -58,7 +58,7 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
         return true;
 
     } catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
+        error_string_ = e.what();
     }
 
     return false;
