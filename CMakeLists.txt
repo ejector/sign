@@ -12,7 +12,9 @@ add_executable(sign
     src/commandlineparser.h
     src/commandlineparser.cpp
     src/filesigner.h
-    src/filesigner.cpp)
+    src/filesigner.cpp
+    src/hashrot13.h
+)
 
 install(TARGETS sign
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

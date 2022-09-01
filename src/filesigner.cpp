@@ -5,21 +5,7 @@
 #include <iostream>
 #include <vector>
 
-template<typename Iter>
-unsigned int HashRot13(Iter iter, size_t size)
-{
-    unsigned int hash = 0;
-
-    auto end = Iter{};
-    while (size-- != 0 && iter++ != end)
-    {
-//        std::cout << "iter pos: " << size << ", value: " << *iter << std::endl;
-        hash += *iter;
-        hash -= (hash << 13) | (hash >> 19);
-    }
-
-    return hash;
-}
+#include "hashrot13.h"
 
 bool FileSigner::GenerateSign(const FileName& input, const FileName& output, size_t block_size)
 {
@@ -41,7 +27,7 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
             stream.seekg(position);
 
             std::istreambuf_iterator<char> iterator(stream);
-            return HashRot13(iterator, block_size - 1);
+            return HashRot13(iterator, block_size);
         };
 
         for (decltype(block_count) i = 0; i < block_count; ++i) {
@@ -49,7 +35,7 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
             signature.at(i) = GenerateHash(i);
         }
 
-        std::ofstream ostream(output, std::ios::binary);
+        std::ofstream ostream(output, std::ios::binary | std::ios::trunc);
 
         for (const auto& item: signature) {
             ostream << item;
