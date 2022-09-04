@@ -5,13 +5,13 @@
 #include <iostream>
 
 template<typename Iter>
-inline unsigned int HashRot13(Iter iter, size_t size)
+inline unsigned int HashRot13(Iter begin, Iter end, size_t size = std::numeric_limits<size_t>::max())
 {
     unsigned int hash = 0;
 
     size_t counter = 0;
 
-    auto end = Iter{};
+    Iter iter = begin;
     while (size-- != 0 && iter != end)
     {
         counter++;
