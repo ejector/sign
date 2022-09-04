@@ -37,13 +37,15 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
             return HashRot13(iterator, end, block_size);
         };
 
-        AsyncPool async_pool;
+        {
+            AsyncPool async_pool;
 
-        for (decltype(block_count) i = 0; i < block_count; ++i) {
-            std::cout << "Block Count: " << i << std::endl;
-            async_pool.WaitIfFullAndExec([&, i = i]() {
-                signature.at(i) = GenerateHash(i);
-            });
+            for (decltype(block_count) i = 0; i < block_count; ++i) {
+                std::cout << "Block Count: " << i << std::endl;
+                async_pool.WaitIfFullAndExec([&, i = i]() {
+                    signature.at(i) = GenerateHash(i);
+                });
+            }
         }
 
         std::ofstream ostream(output, std::ios::binary | std::ios::trunc);
