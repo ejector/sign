@@ -14,6 +14,7 @@ add_executable(sign
     src/filesigner.h
     src/filesigner.cpp
     src/hashrot13.h
+    src/asyncpool.h
 )
 
 install(TARGETS sign

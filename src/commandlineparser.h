@@ -10,7 +10,7 @@ private:
     {
         std::string input_file;
         std::string output_file;
-        size_t block_size = 1024 * 1024;
+        size_t block_size = 1 * 1024 * 1024;
     };
 
 public:

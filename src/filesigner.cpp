@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "hashrot13.h"
+#include "asyncpool.h"
 
 bool FileSigner::GenerateSign(const FileName& input, const FileName& output, size_t block_size)
 {
@@ -36,9 +37,13 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
             return HashRot13(iterator, end, block_size);
         };
 
+        AsyncPool async_pool;
+
         for (decltype(block_count) i = 0; i < block_count; ++i) {
             std::cout << "Block Count: " << i << std::endl;
-            signature.at(i) = GenerateHash(i);
+            async_pool.WaitIfFullAndExec([&, i = i]() {
+                signature.at(i) = GenerateHash(i);
+            });
         }
 
         std::ofstream ostream(output, std::ios::binary | std::ios::trunc);
