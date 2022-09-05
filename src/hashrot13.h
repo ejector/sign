@@ -4,10 +4,10 @@
 #include <cstddef>
 #include <iostream>
 
-template<typename Iter>
-inline unsigned int HashRot13(Iter begin, Iter end, size_t size = std::numeric_limits<size_t>::max())
+template<typename T, typename Iter>
+inline T HashRot13(Iter begin, Iter end, size_t size = std::numeric_limits<size_t>::max())
 {
-    unsigned int hash = 0;
+    T hash = {};
 
     size_t counter = 0;
 
@@ -18,8 +18,6 @@ inline unsigned int HashRot13(Iter begin, Iter end, size_t size = std::numeric_l
         hash += *(iter++);
         hash -= (hash << 13) | (hash >> 19);
     }
-
-    std::cout << "counter " << counter << ", hash " << hash << std::endl;
 
     return hash;
 }
