@@ -45,7 +45,7 @@ public:
     void Write(const HashArray& signature)
     {
         if (std::filesystem::exists(file_name_)) {
-            throw std::logic_error("File already exists!");
+            throw std::logic_error("File " + file_name_ + " already exists!");
         }
 
         std::ofstream file(file_name_, std::ios::binary);

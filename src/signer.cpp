@@ -17,6 +17,10 @@ bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t 
             throw std::logic_error("Block size must be greater then zero!");
         }
 
+        if (std::filesystem::exists(output)) {
+            throw std::logic_error("File " + output + " already exists!");
+        }
+
         auto file_size = std::filesystem::file_size(input);
 
         if (file_size == 0) {
