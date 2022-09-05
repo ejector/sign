@@ -35,7 +35,7 @@ public:
 
         HashArray signature;
         HashType item;
-        while (file.read(reinterpret_cast<char*>(&item), sizeof(item))) {
+        while (file.read(reinterpret_cast<char*>(&item), sizeof(HashType))) {
             signature.push_back(item);
         }
 
