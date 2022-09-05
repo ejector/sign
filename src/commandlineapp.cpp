@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "commandlineparser.h"
-#include "filesigner.h"
+#include "signer.h"
 
 CommandLineApp::CommandLineApp(int argc, char** argv)
     : argc_(argc),
@@ -19,7 +19,7 @@ int CommandLineApp::Exec()
               << ", file with signature is " << args.output_file
               << ", block size is "          << args.block_size   << " mebibytes" << std::endl;
 
-    FileSigner file_signer;
+    Signer file_signer;
     if (!file_signer.GenerateSign(args.input_file, args.output_file, args.block_size)) {
         std::cout << "Cannot generate sign fo file: " << file_signer.GetErrorString() << std::endl;
         return kExitWithError;

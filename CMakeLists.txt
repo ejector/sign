@@ -11,8 +11,8 @@ add_executable(sign
     src/commandlineapp.h
     src/commandlineparser.h
     src/commandlineparser.cpp
-    src/filesigner.h
-    src/filesigner.cpp
+    src/signer.h
+    src/signer.cpp
     src/hashrot13.h
     src/asyncpool.h
     src/signreader.h
