@@ -6,13 +6,13 @@
 #include "randomizer.h"
 
 #include "../src/hashrot13.h"
-#include "../src/filesigner.h"
-#include "../src/signreader.h"
+#include "../src/signer.h"
+#include "../src/signaturefile.h"
 
 class FileSignerTest : public ::testing::Test
 {
 protected:
-    using TestDataType  = std::tuple<std::string, SignReader::HashArray>;
+    using TestDataType  = std::tuple<std::string, SignatureFile::HashArray>;
 
     void TearDown() override
     {
@@ -34,8 +34,8 @@ protected:
             item = randomizer.random();
         });
 
-        auto hash = HashRot13<SignReader::HashType>(std::begin(block), std::end(block));
-        SignReader::HashArray expected_signature(1, hash);
+        auto hash = HashRot13<SignatureFile::HashType>(std::begin(block), std::end(block));
+        SignatureFile::HashArray expected_signature(1, hash);
 
         std::ofstream file(kInputFileName, std::ios::binary | std::ios::trunc);
         std::copy(std::begin(block), std::end(block), std::ostream_iterator<char>(file));
@@ -53,8 +53,8 @@ protected:
             item = randomizer.random();
         });
 
-        auto hash = HashRot13<SignReader::HashType>(std::begin(block), std::end(block));
-        SignReader::HashArray expected_signature(1, hash);
+        auto hash = HashRot13<SignatureFile::HashType>(std::begin(block), std::end(block));
+        SignatureFile::HashArray expected_signature(1, hash);
 
         std::ofstream file(kInputFileName, std::ios::binary | std::ios::trunc);
         std::copy(std::begin(block), std::end(block), std::ostream_iterator<char>(file));
@@ -72,10 +72,10 @@ protected:
             item = randomizer.random();
         });
 
-        SignReader::HashArray expected_signature(2, 0);
+        SignatureFile::HashArray expected_signature(2, 0);
 
-        expected_signature.at(0) = HashRot13<SignReader::HashType>(std::begin(data), std::begin(data) + kBlockSize);
-        expected_signature.at(1) = HashRot13<SignReader::HashType>(std::begin(data) + kBlockSize, std::end(data));
+        expected_signature.at(0) = HashRot13<SignatureFile::HashType>(std::begin(data), std::begin(data) + kBlockSize);
+        expected_signature.at(1) = HashRot13<SignatureFile::HashType>(std::begin(data) + kBlockSize, std::end(data));
 
         std::ofstream file(kInputFileName, std::ios::binary | std::ios::trunc);
         std::copy(std::begin(data), std::end(data), std::ostream_iterator<char>(file));
@@ -94,11 +94,11 @@ protected:
         });
 
         auto block_count = data_size / kBlockSize + (data_size % kBlockSize != 0 ? 1 : 0);
-        SignReader::HashArray expected_signature;
+        SignatureFile::HashArray expected_signature;
         for (size_t i = 0; i < block_count; ++i) {
             auto begin = std::begin(data) + i * kBlockSize;
             auto end = std::distance(begin, std::end(data)) < kBlockSize ? std::end(data) : begin + kBlockSize;
-            expected_signature.push_back(HashRot13<SignReader::HashType>(begin, end));
+            expected_signature.push_back(HashRot13<SignatureFile::HashType>(begin, end));
         }
 
         std::ofstream file(kInputFileName, std::ios::binary | std::ios::trunc);
@@ -115,7 +115,7 @@ protected:
 
 TEST_F(FileSignerTest, GenerateSignNegative)
 {
-    FileSigner file_signer;
+    Signer file_signer;
 
     ASSERT_EQ(false, file_signer.GenerateSign("", "", 1));
     ASSERT_NE("", file_signer.GetErrorString());
@@ -123,7 +123,7 @@ TEST_F(FileSignerTest, GenerateSignNegative)
 
 TEST_F(FileSignerTest, GenerateSignWhenBlockSizeEqualZero)
 {
-    FileSigner file_signer;
+    Signer file_signer;
 
     ASSERT_EQ(false, file_signer.GenerateSign("", "", 0));
     ASSERT_NE("", file_signer.GetErrorString());
@@ -133,10 +133,10 @@ TEST_F(FileSignerTest, GenerateSignWhenFileSizeEqualZero)
 {
     auto&& [input_file_name, expected_signature] = GenTestDataForFileSizeEqualZero();
 
-    FileSigner file_signer;
+    Signer file_signer;
     ASSERT_EQ(true, file_signer.GenerateSign(input_file_name, kOutpuFileName, kBlockSize));
 
-    auto actual_signature = SignReader::Read(kOutpuFileName);
+    auto actual_signature = SignatureFile::Read(kOutpuFileName);
     ASSERT_EQ(expected_signature, actual_signature);
 }
 
@@ -144,10 +144,10 @@ TEST_F(FileSignerTest, GenerateSignWhenFileSizeEqualBlockSize)
 {
     auto&& [input_file_name, expected_signature] = GenTestDataForFileSizeEqualBlockSize();
 
-    FileSigner file_signer;
+    Signer file_signer;
     ASSERT_EQ(true, file_signer.GenerateSign(input_file_name, kOutpuFileName, kBlockSize));
 
-    auto actual_signature = SignReader::Read(kOutpuFileName);
+    auto actual_signature = SignatureFile::Read(kOutpuFileName);
     ASSERT_EQ(expected_signature, actual_signature);
 }
 
@@ -155,10 +155,10 @@ TEST_F(FileSignerTest, GenerateSignWhenFileSizeLessBlockSize)
 {
     auto&& [input_file_name, expected_signature] = GenTestDataForFileSizeLessBlockSize();
 
-    FileSigner file_signer;
+    Signer file_signer;
     ASSERT_EQ(true, file_signer.GenerateSign(input_file_name, kOutpuFileName, kBlockSize));
 
-    auto actual_signature = SignReader::Read(kOutpuFileName);
+    auto actual_signature = SignatureFile::Read(kOutpuFileName);
     ASSERT_EQ(expected_signature, actual_signature);
 }
 
@@ -166,10 +166,10 @@ TEST_F(FileSignerTest, GenerateSignWhenFileSizeGreaterBlockSize)
 {
     auto&& [input_file_name, expected_signature] = GenTestDataForFileSizeGreaterBlockSize();
 
-    FileSigner file_signer;
+    Signer file_signer;
     ASSERT_EQ(true, file_signer.GenerateSign(input_file_name, kOutpuFileName, kBlockSize));
 
-    auto actual_signature = SignReader::Read(kOutpuFileName);
+    auto actual_signature = SignatureFile::Read(kOutpuFileName);
     ASSERT_EQ(expected_signature, actual_signature);
 }
 
@@ -177,9 +177,9 @@ TEST_F(FileSignerTest, GenerateSignWhenFileHasManyBlocks)
 {
     auto&& [input_file_name, expected_signature] = GenTestDataForFileHasManyBlocks();
 
-    FileSigner file_signer;
+    Signer file_signer;
     ASSERT_EQ(true, file_signer.GenerateSign(input_file_name, kOutpuFileName, kBlockSize));
 
-    auto actual_signature = SignReader::Read(kOutpuFileName);
+    auto actual_signature = SignatureFile::Read(kOutpuFileName);
     ASSERT_EQ(expected_signature, actual_signature);
 }

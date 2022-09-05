@@ -1,9 +1,9 @@
-#ifndef FILESIGNER_H
-#define FILESIGNER_H
+#ifndef SIGNER_H
+#define SIGNER_H
 
 #include <string>
 
-class FileSigner
+class Signer
 {
     using FileName = std::string;
 public:
@@ -17,4 +17,4 @@ protected:
     std::string error_string_;
 };
 
-#endif // FILESIGNER_H
+#endif // SIGNER_H

@@ -1,4 +1,4 @@
-#include "filesigner.h"
+#include "signer.h"
 
 #include <filesystem>
 #include <fstream>
@@ -7,9 +7,9 @@
 
 #include "hashrot13.h"
 #include "asyncpool.h"
-#include "signreader.h"
+#include "signaturefile.h"
 
-bool FileSigner::GenerateSign(const FileName& input, const FileName& output, size_t block_size)
+bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t block_size)
 {
     try {
 
@@ -26,7 +26,7 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
 
         auto block_count = file_size / block_size + (file_size % block_size != 0 ? 1 : 0);
 
-        SignReader::HashArray signature(block_count, 0);
+        SignatureFile::HashArray signature(block_count, 0);
 
         auto GenerateHash = [&](size_t block_index) {
             std::ifstream stream(input, std::ios::binary);
@@ -38,7 +38,7 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
             stream.seekg(position);
 
             std::istreambuf_iterator<char> iterator(stream), end;
-            return HashRot13<SignReader::HashType>(iterator, end, block_size);
+            return HashRot13<SignatureFile::HashType>(iterator, end, block_size);
         };
 
         {
@@ -51,7 +51,7 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
             }
         }
 
-        SignReader sign_reader(output);
+        SignatureFile sign_reader(output);
         sign_reader.Write(signature);
 
         return true;

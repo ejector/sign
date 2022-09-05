@@ -4,8 +4,10 @@ add_executable(
     sign_test
     filesigner_tests.cpp
     randomizer.h
-    ../src/filesigner.h
-    ../src/filesigner.cpp
+    ../src/signer.h
+    ../src/signer.cpp
+    ../src/hashrot13.h
+    ../src/signaturefile.h
 )
 
 target_link_libraries(

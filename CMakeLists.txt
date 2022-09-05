@@ -15,7 +15,7 @@ add_executable(sign
     src/signer.cpp
     src/hashrot13.h
     src/asyncpool.h
-    src/signreader.h
+    src/signaturefile.h
 )
 
 install(TARGETS sign

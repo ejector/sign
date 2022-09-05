@@ -1,5 +1,5 @@
-#ifndef SIGNREADER_H
-#define SIGNREADER_H
+#ifndef SIGNATUREFILE_H
+#define SIGNATUREFILE_H
 
 #include <filesystem>
 #include <fstream>
@@ -7,7 +7,7 @@
 #include <string>
 #include <stdexcept>
 
-class SignReader final
+class SignatureFile final
 {
 public:
     using HashType = unsigned int;
@@ -15,11 +15,11 @@ public:
 public:
     [[nodiscard]] static HashArray Read(const std::string& file_name)
     {
-        SignReader sign_reader(file_name);
+        SignatureFile sign_reader(file_name);
         return sign_reader.Read();
     }
 public:
-    SignReader(const std::string& file_name)
+    SignatureFile(const std::string& file_name)
         : file_name_(file_name)
     {
 
@@ -62,4 +62,4 @@ protected:
     std::string file_name_;
 };
 
-#endif // SIGNREADER_H
+#endif // SIGNATUREFILE_H
