@@ -7,10 +7,16 @@
 
 #include "hashrot13.h"
 #include "asyncpool.h"
+#include "signreader.h"
 
 bool FileSigner::GenerateSign(const FileName& input, const FileName& output, size_t block_size)
 {
     try {
+
+        if (block_size == 0) {
+            throw std::logic_error("Block size must be greater then zero!");
+        }
+
         auto file_size = std::filesystem::file_size(input);
 
         if (file_size == 0) {
@@ -20,11 +26,9 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
 
         auto block_count = file_size / block_size + (file_size % block_size != 0 ? 1 : 0);
 
-        std::cout << "Block counts: " << block_count << std::endl;
+        SignReader::HashArray signature(block_count, 0);
 
-        std::vector<unsigned int> signature(block_count, 0);
-
-        auto GenerateHash = [=](size_t block_index) {
+        auto GenerateHash = [&](size_t block_index) {
             std::ifstream stream(input, std::ios::binary);
             if (!stream) {
                 throw std::logic_error("Cannot open file: " + input);
@@ -34,25 +38,21 @@ bool FileSigner::GenerateSign(const FileName& input, const FileName& output, siz
             stream.seekg(position);
 
             std::istreambuf_iterator<char> iterator(stream), end;
-            return HashRot13(iterator, end, block_size);
+            return HashRot13<SignReader::HashType>(iterator, end, block_size);
         };
 
         {
             AsyncPool async_pool;
 
             for (decltype(block_count) i = 0; i < block_count; ++i) {
-                std::cout << "Block Count: " << i << std::endl;
                 async_pool.WaitIfFullAndExec([&, i = i]() {
                     signature.at(i) = GenerateHash(i);
                 });
             }
         }
 
-        std::ofstream ostream(output, std::ios::binary | std::ios::trunc);
-
-        for (const auto& item: signature) {
-            ostream.write(reinterpret_cast<const char*>(&item), sizeof(item));
-        }
+        SignReader sign_reader(output);
+        sign_reader.Write(signature);
 
         return true;
 
