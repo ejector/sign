@@ -16,6 +16,7 @@ add_executable(sign
     src/hashrot13.h
     src/asyncpool.h
     src/signaturefile.h
+    src/threadsafequeue.h
 )
 
 install(TARGETS sign
