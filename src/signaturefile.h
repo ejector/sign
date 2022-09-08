@@ -28,6 +28,7 @@ public:
     [[nodiscard]] HashArray Read() const
     {
         std::ifstream file(file_name_, std::ios::binary);
+        file.exceptions(std::ios::failbit);
 
         if (!file.is_open()) {
             throw std::logic_error("Cannot open file!");
@@ -49,6 +50,7 @@ public:
         }
 
         std::ofstream file(file_name_, std::ios::binary);
+        file.exceptions(std::ios::failbit);
 
         if (!file.is_open()) {
             throw std::logic_error("Cannot open file!");
