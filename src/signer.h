@@ -14,6 +14,12 @@ public:
     }
 
 protected:
+    void CheckBlockSize(size_t block_size);
+    void CheckOutputFile(const FileName& value);
+    void CreateEmptyFile(const FileName& value);
+    size_t GetBlocksCount(size_t file_size, size_t block_size);
+
+protected:
     std::string error_string_;
 };
 
