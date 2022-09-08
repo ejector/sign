@@ -9,12 +9,9 @@ inline T HashRot13(Iter begin, Iter end, size_t size = std::numeric_limits<size_
 {
     T hash = {};
 
-    size_t counter = 0;
-
     Iter iter = begin;
     while (size-- != 0 && iter != end)
     {
-        counter++;
         hash += *(iter++);
         hash -= (hash << 13) | (hash >> 19);
     }
