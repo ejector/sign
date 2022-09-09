@@ -28,7 +28,7 @@ bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t 
 
         auto GenerateHash = [&](size_t block_index) {
             std::ifstream stream(input, std::ios::binary);
-            stream.exceptions(std::ios::failbit);
+//            stream.exceptions(std::ios::failbit);
 
             if (!stream) {
                 throw std::logic_error("Cannot open file: " + input);
@@ -45,7 +45,7 @@ bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t 
             AsyncPool async_pool;
 
             for (decltype(blocks_count) i = 0; i < blocks_count; ++i) {
-                async_pool.WaitIfFullAndExec([&, i = i]() {
+                async_pool.Exec([&, i = i]() {
                     signature.at(i) = GenerateHash(i);
                 });
             }
