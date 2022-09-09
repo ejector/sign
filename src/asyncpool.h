@@ -1,10 +1,13 @@
 #ifndef ASYNCPOOL_H
 #define ASYNCPOOL_H
 
+#include <iostream>
 #include <queue>
 #include <thread>
 #include <future>
 #include <functional>
+
+#include "threadsafequeue.h"
 
 class AsyncPool final
 {
@@ -19,17 +22,64 @@ public:
         if (maximum_thead_count_ < 1) {
             maximum_thead_count_ = 1;
         }
+
+        for (decltype(maximum_thead_count_) i = 0; i < maximum_thead_count_; ++i) {
+            threads.emplace_back([&]() {
+                try {
+                    while (!stop_) {
+                        auto task = tasks_.Pop();
+                        if (task.valid()) {
+                            task();
+                        }
+                    }
+                } catch (const std::exception& e) {
+                    std::cout << "exception: " << e.what() << std::endl;
+                } catch (...) {
+                    std::cout << "exception" << std::endl;
+                }
+
+            });
+        }
     }
-    void WaitIfFullAndExec(std::function<void()> func)
+    ~AsyncPool()
+    {
+        stop_ = true;
+        for (decltype(maximum_thead_count_) i = 0; i < maximum_thead_count_; ++i) {
+            Async([](){});
+        }
+        for (decltype(maximum_thead_count_) i = 0; i < maximum_thead_count_; ++i) {
+            if (threads[i].joinable()) {
+                threads[i].join();
+            }
+        }
+    }
+    void Exec(std::function<void()> func)
     {
         if (queue_.size() >= maximum_thead_count_) {
+            auto f = std::move(queue_.front());
+            if (f.valid()) {
+                f.get();
+            }
             queue_.pop();
         }
-        queue_.emplace(std::async(std::launch::async, func));
+        queue_.emplace(Async(func));
     }
+
+    std::future<void> Async(std::function<void()> func)
+    {
+        std::packaged_task<void()> task(func);
+        auto result = task.get_future();
+        tasks_.Push(std::move(task));
+        return result;
+    }
+
 protected:
     std::queue<std::future<void>> queue_;
     unsigned int maximum_thead_count_ = std::thread::hardware_concurrency();
+
+    std::vector<std::thread> threads;
+    bool stop_ = false;
+    ThreadSafeQueue<std::packaged_task<void()>> tasks_;
 };
 
 #endif // ASYNCPOOL_H
