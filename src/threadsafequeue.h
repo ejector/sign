@@ -13,7 +13,7 @@ public:
     void Push(T value)
     {
         std::unique_lock lock(mutex_);
-        queue_.emplace(std::move(value));
+        queue_.push(std::move(value));
         lock.unlock();
         condition_.notify_one();
     }
@@ -26,7 +26,7 @@ public:
         if (queue_.empty()) {
             throw std::logic_error("Queue is empty, cannot pop item!");
         }
-        T temp = std::move(queue_.back());
+        T temp = std::move(queue_.front());
         queue_.pop();
 
         return temp;
