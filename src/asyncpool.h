@@ -25,19 +25,18 @@ public:
 
         for (decltype(maximum_thead_count_) i = 0; i < maximum_thead_count_; ++i) {
             threads.emplace_back([&]() {
-                try {
-                    while (!stop_) {
+                while (!stop_) {
+                    try {
                         auto task = tasks_.Pop();
                         if (task.valid()) {
                             task();
                         }
+                    } catch (const std::exception& e) {
+                        std::cout << "exception: " << e.what() << std::endl;
+                    } catch (...) {
+                        std::cout << "exception" << std::endl;
                     }
-                } catch (const std::exception& e) {
-                    std::cout << "exception: " << e.what() << std::endl;
-                } catch (...) {
-                    std::cout << "exception" << std::endl;
                 }
-
             });
         }
     }
@@ -45,7 +44,7 @@ public:
     {
         stop_ = true;
         for (decltype(maximum_thead_count_) i = 0; i < maximum_thead_count_; ++i) {
-            Async([](){});
+            auto r = Async([](){});
         }
         for (decltype(maximum_thead_count_) i = 0; i < maximum_thead_count_; ++i) {
             if (threads[i].joinable()) {
@@ -65,7 +64,7 @@ public:
         queue_.emplace(Async(func));
     }
 
-    std::future<void> Async(std::function<void()> func)
+    [[nodiscard]] std::future<void> Async(std::function<void()> func)
     {
         std::packaged_task<void()> task(func);
         auto result = task.get_future();
