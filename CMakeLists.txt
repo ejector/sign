@@ -14,7 +14,7 @@ add_executable(sign
     src/signer.h
     src/signer.cpp
     src/hashrot13.h
-    src/asyncpool.h
+    src/threadpool.h
     src/signaturefile.h
     src/threadsafequeue.h
     src/taskpool.h

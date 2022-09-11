@@ -1,5 +1,5 @@
-#ifndef ASYNCPOOL_H
-#define ASYNCPOOL_H
+#ifndef THREADPOOL_H
+#define THREADPOOL_H
 
 #include <iostream>
 #include <queue>
@@ -9,14 +9,14 @@
 
 #include "threadsafequeue.h"
 
-class AsyncPool final
+class ThreadPool final
 {
 public:
-    AsyncPool()
-        : AsyncPool(std::thread::hardware_concurrency())
+    ThreadPool()
+        : ThreadPool(std::thread::hardware_concurrency())
     {
     }
-    AsyncPool(unsigned int maximim_thread_count)
+    ThreadPool(unsigned int maximim_thread_count)
         : maximum_thead_count_(maximim_thread_count)
     {
         if (maximum_thead_count_ < 1) {
@@ -40,7 +40,7 @@ public:
             });
         }
     }
-    ~AsyncPool()
+    ~ThreadPool()
     {
         stop_ = true;
         for (decltype(maximum_thead_count_) i = 0; i < maximum_thead_count_; ++i) {
@@ -52,16 +52,16 @@ public:
             }
         }
     }
-    void Exec(std::function<void()> func)
+
+    static ThreadPool& Instance()
     {
-        if (queue_.size() >= maximum_thead_count_) {
-            auto f = std::move(queue_.front());
-            if (f.valid()) {
-                f.get();
-            }
-            queue_.pop();
-        }
-        queue_.emplace(Async(func));
+        static ThreadPool thread_pool;
+        return thread_pool;
+    }
+
+    unsigned int MaximumThreadCount() const
+    {
+        return maximum_thead_count_;
     }
 
     [[nodiscard]] std::future<void> Async(std::function<void()> func)
@@ -73,12 +73,10 @@ public:
     }
 
 protected:
-    std::queue<std::future<void>> queue_;
     unsigned int maximum_thead_count_ = std::thread::hardware_concurrency();
-
-    std::vector<std::thread> threads;
     bool stop_ = false;
+    std::vector<std::thread> threads;
     ThreadSafeQueue<std::packaged_task<void()>> tasks_;
 };
 
-#endif // ASYNCPOOL_H
+#endif // THREADPOOL_H

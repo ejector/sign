@@ -11,7 +11,7 @@ class TaskPool final
 {
 public:
     TaskPool()
-        : TaskPool(ThreadPool::instance().MaximumThreadCount())
+        : TaskPool(ThreadPool::Instance().MaximumThreadCount())
     {
     }
     TaskPool(size_t count)
