@@ -17,6 +17,7 @@ add_executable(sign
     src/asyncpool.h
     src/signaturefile.h
     src/threadsafequeue.h
+    src/taskpool.h
 )
 
 install(TARGETS sign
