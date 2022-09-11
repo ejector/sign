@@ -18,16 +18,27 @@ public:
         : count_(count)
     {
     }
+    ~TaskPool()
+    {
+        while (!queue_.empty()) {
+            WaitFrontTaskAndRemove();
+        }
+    }
     void WaitIfFullAndExec(std::function<void()> func)
     {
         if (queue_.size() >= count_) {
-            auto f = std::move(queue_.front());
-            if (f.valid()) {
-                f.get();
-            }
-            queue_.pop();
+            WaitFrontTaskAndRemove();
         }
         queue_.emplace(ThreadPool::Instance().Async(func));
+    }
+protected:
+    void WaitFrontTaskAndRemove()
+    {
+        auto f = std::move(queue_.front());
+        if (f.valid()) {
+            f.get();
+        }
+        queue_.pop();
     }
 protected:
     std::queue<std::future<void>> queue_;
