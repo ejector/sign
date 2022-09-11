@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "hashrot13.h"
-#include "asyncpool.h"
+#include "taskpool.h"
 #include "signaturefile.h"
 
 bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t block_size)
@@ -42,10 +42,10 @@ bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t 
         };
 
         {
-            AsyncPool async_pool;
+            TaskPool task_pool;
 
             for (decltype(blocks_count) i = 0; i < blocks_count; ++i) {
-                async_pool.Exec([&, i = i]() {
+                task_pool.WaitIfFullAndExec([&, i = i]() {
                     signature.at(i) = GenerateHash(i);
                 });
             }
