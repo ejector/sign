@@ -4,10 +4,12 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <cstring>
 
 #include "hashrot13.h"
 #include "taskpool.h"
 #include "signaturefile.h"
+#include "pool.h"
 
 bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t block_size)
 {
@@ -26,18 +28,22 @@ bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t 
 
         SignatureFile::HashArray signature(blocks_count, 0);
 
-        auto GenerateHash = [&](size_t block_index) {
-            std::ifstream stream(input, std::ios::binary);
-//            stream.exceptions(std::ios::failbit);
+        Pool<std::ifstream> stream_pool(ThreadPool::Instance().MaximumThreadCount(), input, std::ios::binary);
 
-            if (!stream) {
-                throw std::logic_error("Cannot open file: " + input);
+        auto GenerateHash = [&](size_t block_index) {
+            auto stream_ptr = stream_pool.Get();
+
+            if (!stream_ptr) {
+                throw std::logic_error("Stream does not exist!");
             }
 
             auto position = block_index * block_size;
-            stream.seekg(position);
 
-            std::istreambuf_iterator<char> iterator(stream), end;
+            if (!stream_ptr->seekg(position)) {
+                throw std::logic_error("Cannot read file: " + output + ". Error: " + std::strerror(errno));
+            }
+
+            std::istreambuf_iterator<char> iterator(*stream_ptr), end;
             return HashRot13<SignatureFile::HashType>(iterator, end, block_size);
         };
 
@@ -90,4 +96,3 @@ void Signer::CheckBlockSize(size_t block_size)
         throw std::logic_error("Block size must be greater then zero!");
     }
 }
-
