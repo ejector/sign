@@ -18,13 +18,13 @@ public:
         : count_(count)
     {
     }
-    ~TaskPool()
+    ~TaskPool() noexcept
     {
         while (!queue_.empty()) {
             WaitFrontTaskAndRemove();
         }
     }
-    void WaitIfFullAndExec(std::function<void()> func)
+    void Exec(std::function<void()> func)
     {
         if (queue_.size() >= count_) {
             WaitFrontTaskAndRemove();
