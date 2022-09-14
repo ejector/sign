@@ -27,17 +27,21 @@ public:
 
     [[nodiscard]] HashArray Read() const
     {
-        std::ifstream file(file_name_, std::ios::binary);
-//        file.exceptions(std::ios::failbit);
-
-        if (!file.is_open()) {
-            throw std::logic_error("Cannot open file!");
-        }
-
         HashArray signature;
-        HashType item;
-        while (file.read(reinterpret_cast<char*>(&item), sizeof(HashType))) {
-            signature.push_back(item);
+        std::ifstream file;
+
+        try {
+            file.exceptions(std::ios::failbit);
+            file.open(file_name_, std::ios::binary);
+
+            HashType item;
+            while (file.read(reinterpret_cast<char*>(&item), sizeof(HashType))) {
+                signature.push_back(item);
+            }
+        } catch (const std::ios_base::failure& e) {
+            if (!file.eof()) {
+                throw;
+            }
         }
 
         return signature;
@@ -45,16 +49,10 @@ public:
 
     void Write(const HashArray& signature)
     {
-        if (std::filesystem::exists(file_name_)) {
-            throw std::logic_error("File " + file_name_ + " already exists!");
-        }
+        std::ofstream file;
+        file.exceptions(std::ios::failbit);
 
-        std::ofstream file(file_name_, std::ios::binary);
-//        file.exceptions(std::ios::failbit);
-
-        if (!file.is_open()) {
-            throw std::logic_error("Cannot open file!");
-        }
+        file.open(file_name_, std::ios::binary);
 
         for (const auto& item: signature) {
             file.write(reinterpret_cast<const char*>(&item), sizeof(HashType));
