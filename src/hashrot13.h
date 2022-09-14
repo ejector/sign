@@ -19,4 +19,13 @@ inline T HashRot13(Iter begin, Iter end, size_t size = std::numeric_limits<size_
     return hash;
 }
 
+
+template<typename T, typename Add>
+inline T HashRot13(T hash, Add add)
+{
+    hash += add;
+    hash -= (hash << 13) | (hash >> 19);
+    return hash;
+}
+
 #endif // HASHROT13_H
