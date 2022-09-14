@@ -1,8 +1,10 @@
 #include "signer.h"
 
+#include <atomic>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 #include <vector>
 #include <cstring>
 
@@ -11,7 +13,7 @@
 #include "signaturefile.h"
 #include "pool.h"
 
-bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t block_size)
+bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t block_size) noexcept
 {
     try {
 
@@ -28,37 +30,66 @@ bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t 
 
         SignatureFile::HashArray signature(blocks_count, 0);
 
-        Pool<std::ifstream> stream_pool(ThreadPool::Instance().MaximumThreadCount(), input, std::ios::binary);
+        std::atomic_bool aborted = false;
+        Pool<std::ifstream> stream_pool(ThreadPool::Instance().MaximumThreadCount());
 
         auto GenerateHash = [&](size_t block_index) {
-            auto stream_ptr = stream_pool.Get();
 
-            if (!stream_ptr) {
-                throw std::logic_error("Stream does not exist!");
-            }
+                auto stream_ptr = stream_pool.Get();
 
-            auto position = block_index * block_size;
+                if (!stream_ptr) {
+                    throw std::logic_error("Stream does not exist!");
+                }
 
-            if (!stream_ptr->seekg(position)) {
-                throw std::logic_error("Cannot read file: " + output + ". Error: " + std::strerror(errno));
-            }
+                if (!stream_ptr->is_open()) {
+                    stream_ptr->exceptions(std::ios::failbit);
+                    stream_ptr->open(input, std::ios::binary);
+                }
 
-            std::istreambuf_iterator<char> iterator(*stream_ptr), end;
-            return HashRot13<SignatureFile::HashType>(iterator, end, block_size);
+                auto position = block_index * block_size;
+                stream_ptr->seekg(position);
+
+                SignatureFile::HashType hash{};
+                auto remainder = file_size - position;
+                auto read_size =  remainder < block_size ? remainder : block_size;
+                char ch;
+                while (!aborted && read_size-- != 0 && stream_ptr->read(&ch, sizeof(ch))) {
+                    hash = HashRot13(hash, ch);
+                }
+
+                return hash;
         };
 
+        std::string error;
+
         {
+            std::mutex lock;
             TaskPool task_pool;
 
             for (decltype(blocks_count) i = 0; i < blocks_count; ++i) {
-                task_pool.WaitIfFullAndExec([&, i = i]() {
-                    signature.at(i) = GenerateHash(i);
+                task_pool.Exec([&, i = i]() {
+                    try {
+                        signature.at(i) = GenerateHash(i);
+                    } catch (const std::exception& e) {
+                        std::lock_guard locker(lock);
+                        if (!aborted) {
+                            error = e.what();
+                            if (auto* ios_failure = dynamic_cast<const std::ios_base::failure*>(&e)) {
+                                error += std::string(": ") + std::strerror(ios_failure->code().value());
+                            }
+                        }
+                        aborted = true;
+                    }
                 });
             }
         }
 
-        SignatureFile sign_reader(output);
-        sign_reader.Write(signature);
+        if (aborted) {
+            throw std::logic_error(error);
+        }
+
+        SignatureFile signature_file(output);
+        signature_file.Write(signature);
 
         return true;
 

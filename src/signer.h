@@ -7,7 +7,7 @@ class Signer
 {
     using FileName = std::string;
 public:
-    [[nodiscard]] bool GenerateSign(const FileName& input, const FileName& output, size_t block_size);
+    [[nodiscard]] bool GenerateSign(const FileName& input, const FileName& output, size_t block_size) noexcept;
     [[nodiscard]] const std::string& GetErrorString() const
     {
         return error_string_;
