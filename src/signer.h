@@ -3,7 +3,7 @@
 
 #include <string>
 
-class Signer
+class Signer final
 {
     using FileName = std::string;
 public:
@@ -14,10 +14,10 @@ public:
     }
 
 protected:
-    void CheckBlockSize(size_t block_size);
-    void CheckOutputFile(const FileName& value);
-    void CreateEmptyFile(const FileName& value);
-    size_t GetBlocksCount(size_t file_size, size_t block_size);
+    void CheckBlockSize(size_t block_size) const;
+    void CheckOutputFile(const FileName& value) const;
+    void CreateEmptyFile(const FileName& value) const;
+    [[nodiscard]] size_t GetBlocksCount(size_t file_size, size_t block_size) const;
 
 protected:
     std::string error_string_;

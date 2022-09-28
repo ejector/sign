@@ -19,6 +19,7 @@ add_executable(sign
     src/threadsafequeue.h
     src/taskpool.h
     src/pool.h
+    src/streamhashgenerator.h
 )
 
 install(TARGETS sign
