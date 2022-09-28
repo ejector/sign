@@ -32,15 +32,14 @@ public:
                             task();
                         }
                     } catch (const std::exception& e) {
-                        std::cout << "exception: " << e.what() << std::endl;
-                    } catch (...) {
-                        std::cout << "exception" << std::endl;
+                        std::cout << "Fatal error: " << e.what() << ". Terminate." << std::endl;
+                        throw;
                     }
                 }
             });
         }
     }
-    ~ThreadPool()
+    ~ThreadPool() noexcept
     {
         stop_ = true;
         for (decltype(maximum_thead_count_) i = 0; i < maximum_thead_count_; ++i) {
@@ -71,6 +70,11 @@ public:
         tasks_.Push(std::move(task));
         return result;
     }
+
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool(ThreadPool&&) = delete;
+    ThreadPool& operator=(const ThreadPool&) = delete;
+    ThreadPool& operator=(ThreadPool&&) = delete;
 
 protected:
     unsigned int maximum_thead_count_ = std::thread::hardware_concurrency();
