@@ -5,10 +5,10 @@ class CommandLineApp final
 {
 public:
     explicit CommandLineApp(int argc, char** argv);
-    [[nodiscard]] int Exec();
+    [[nodiscard]] int Exec() const;
 
 public:
-    static constexpr int kExitWithError = -1;
+    static constexpr int kExitWithError = 1;
 
 protected:
     int argc_;

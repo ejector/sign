@@ -11,7 +11,7 @@ CommandLineApp::CommandLineApp(int argc, char** argv)
 {
 }
 
-int CommandLineApp::Exec()
+int CommandLineApp::Exec() const
 {
     auto&& args = CommandLineParser::Parse(argc_, argv_);
 
