@@ -50,9 +50,14 @@ public:
         return hash;
     }
 
-    std::atomic_bool& Aborted()
+    bool Aborted() const
     {
         return aborted_;
+    }
+
+    void SetAborted(bool value)
+    {
+        aborted_ = value;
     }
 
 private:

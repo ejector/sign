@@ -26,28 +26,26 @@ bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t 
 
         SignatureFile::HashArray signature(blocks_count, 0);
 
-        StreamHashGenerator generator(input, file_size, block_size, ThreadPool::Instance().MaximumThreadCount());
-        std::atomic_bool& aborted = generator.Aborted();
-
+        StreamHashGenerator hash_generator(input, file_size, block_size, ThreadPool::Instance().MaximumThreadCount());
         {
             std::mutex lock;
             TaskPool task_pool;
 
             auto handle_exception = [&](const std::exception& e) {
                 std::lock_guard locker(lock);
-                if (!aborted) {
+                if (!hash_generator.Aborted()) {
                     error_string_ = e.what();
                     if (const auto* ios_failure = dynamic_cast<const std::ios_base::failure*>(&e)) {
                         error_string_ += std::string(": ") + std::strerror(ios_failure->code().value());
                     }
                 }
-                aborted = true;
+                hash_generator.SetAborted(true);
             };
 
-            for (decltype(blocks_count) i = 0; i < blocks_count && !aborted; ++i) {
+            for (decltype(blocks_count) i = 0; i < blocks_count && !hash_generator.Aborted(); ++i) {
                 task_pool.Exec([&, i = i]() {
                     try {
-                        signature.at(i) = generator.Generate(i);
+                        signature.at(i) = hash_generator.Generate(i);
                     } catch (const std::exception& e) {
                         handle_exception(e);
                     }
@@ -55,7 +53,7 @@ bool Signer::GenerateSign(const FileName& input, const FileName& output, size_t 
             }
         }
 
-        if (aborted) {
+        if (hash_generator.Aborted()) {
             return false;
         }
 

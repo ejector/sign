@@ -30,7 +30,6 @@ CommandLineParser::Args CommandLineParser::Parse(int argc, char** argv)
         } catch (const std::exception& e) {
             throw std::invalid_argument("Cannot convert block size to integer");
         }
-
     }
 
     return args;
