@@ -14,14 +14,14 @@ public:
     {
 
     }
-    int random()
+    T Random()
     {
         return _distrib(_generator);
     }
 protected:
     std::random_device _random_device;
     std::mt19937 _generator;
-    std::uniform_int_distribution<> _distrib;
+    std::uniform_int_distribution<T> _distrib;
 };
 
 #endif // RANDOMIZER_H
