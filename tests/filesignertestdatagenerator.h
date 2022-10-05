@@ -1,7 +1,10 @@
 #ifndef FILESIGNERTESTDATAGENERATOR_H
 #define FILESIGNERTESTDATAGENERATOR_H
 
+#include <algorithm>
 #include <fstream>
+#include <iterator>
+#include <vector>
 #include <string>
 #include <tuple>
 
@@ -131,12 +134,6 @@ public:
             { kFileSizeGreaterBlockSize, GenTestDataForFileSizeGreaterBlockSize("input3.bin") },
             { kFileHasManyBlocks,        GenTestDataForFileHasManyBlocks("input4.bin")        }
         };
-    }
-
-    static std::map<std::string_view, TestDataType> GenerateTestData(size_t block_size)
-    {
-        static auto data = TestDataGenerator(block_size).GenerateTestData();
-        return data;
     }
 
     static constexpr std::string_view kFileSizeEqualZero        = "FileSizeEqualZero";

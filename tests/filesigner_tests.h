@@ -1,8 +1,6 @@
 #ifndef FILESIGNER_TESTS_H
 #define FILESIGNER_TESTS_H
 
-#include <array>
-#include <fstream>
 #include <filesystem>
 
 #include <gtest/gtest.h>
@@ -17,7 +15,7 @@ class FileSignerTest : public ::testing::Test
 public:
     static const std::map<std::string_view, TestDataGenerator::TestDataType>& FileSignerTestData()
     {
-        static auto test_data = TestDataGenerator::GenerateTestData(kBlockSize);
+        static auto test_data = TestDataGenerator(kBlockSize).GenerateTestData();
         return test_data;
     }
 protected:
