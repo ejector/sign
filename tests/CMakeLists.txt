@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 add_executable(
     sign_test
-    filesigner_tests.h
+    filesigner_tests.cpp
     randomizer.h
     filesignertestdatagenerator.h
     ../src/signer.h
